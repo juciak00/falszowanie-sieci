@@ -1,0 +1,112 @@
+Cel projektu
+Celem jest praktyczne przeanalizowanie wybranego zagrożenia sieciowego w konkretnej topologii, a
+następnie:
+1. wykonanie ataku w kontrolowanym środowisku,
+2. wdrożenie zabezpieczenia,
+3. ponowne wykonanie ataku w celu potwierdzenia skuteczności ochrony.
+Projekt kończy się kompletną dokumentacją (PDF) opisującą całość prac.
+Organizacja pracy
+• Praca w grupach (zgodnie z ustaleniami prowadzącego; standardowo 2 os.).
+• Środowisko: realne lub symulowane (np. Packet Tracer / GNS3 / EVE-NG / urządzenia
+Cisco/MikroTik / VM).
+• Projekt realizowany etapowo – każdy etap wymaga weryfikacji i zatwierdzenia, aby przejść
+dalej.
+• Dokumentacja końcowa: PDF + załączniki techniczne (np. konfiguracje, pliki, zrzuty, pcapy –
+jeśli są).
+Harmonogram i wymagania (3 etapy po 30 dni)
+Etap 1 (0–30 dni): Dobór grupy i wybór tematu
+Co robicie:
+1. Dobieracie się w grupy.
+2. Wybieracie temat (rodzaj ataku / zagrożenia) oraz wstępnie określacie:
+o w jakim środowisku będzie realizacja (symulacja / real),
+o jakie technologie będą w topologii (VLAN, routing, DHCP, DNS, ACL, VPN itp.).
+Co oddajecie (minimum do weryfikacji):
+• „Karta projektu” (1 strona):
+o skład grupy,
+o temat ataku,
+o środowisko realizacji,
+o krótki opis założeń (2–5 zdań: co i po co).
+Weryfikacja / zatwierdzenie etapu 1:
+• prowadzący sprawdza: czy temat jest wykonalny, czy nie dubluje się masowo, czy ma sens w
+kontekście zajęć,
+• zatwierdzenie = zielone światło do etapu 2.
+Etap 2 (31–60 dni): Plan pracy + szczegółowa topologia + scenariusz ataku i obrony
+To jest etap „projektu technicznego” – ma być konkretnie, bo to będzie Wasza mapa drogowa.
+Co oddajecie (plan pracy, dość szczegółowo):
+A) Topologia – opis i rysunek (wymagane)
+• Dokładny diagram topologii (czytelny, podpisany), obejmujący:
+o urządzenia (router/switch/firewall/hosty/serwery),
+o interfejsy/porty (tam gdzie ma to znaczenie),
+o VLAN-y / segmenty,
+o połączenia i ich typ (access/trunk, WAN/LAN, itd.).
+B) Adresacja i role (wymagane)
+• Tabela adresacji:
+o sieci/podsieci,
+o adresy IP urządzeń kluczowych,
+o bramy domyślne,
+o DNS/DHCP (jeśli występuje),
+o konta testowe (jeśli potrzebne), zasady haseł (w projekcie – bez ujawniania realnych
+haseł).
+• Opis ról hostów:
+o „atakujący”, „ofiara”, „administrator”, „serwer X”.
+C) Scenariusz ataku (wymagane)
+• Jak przeprowadzicie atak – krokowo (wysoki poziom, ale konkretnie):
+o jakie warunki muszą być spełnione,
+o jakie narzędzia wykorzystacie,
+o co będzie miernikiem sukcesu ataku (np. przechwycenie, przerwanie usługi,
+eskalacja, itp.),
+o jakie artefakty zbierzecie jako dowód (np. logi, pcap, zrzuty, wyniki poleceń).
+D) Scenariusz zabezpieczenia (wymagane)
+• Co wdrożycie, żeby atak zablokować lub ograniczyć:
+o jakie mechanizmy (np. ACL, port security, DHCP snooping, DAI, autoryzacja routingu,
+IDS/IPS, segmentacja),
+o gdzie dokładnie (na jakim urządzeniu / interfejsie / VLAN),
+o jak zweryfikujecie, że to działa.
+E) Powtórzenie ataku po wdrożeniu zabezpieczeń (wymagane)
+• Plan „re-testu”: jak ponowicie atak i co ma wyjść inaczej.
+• Kryterium sukcesu zabezpieczenia (np. brak efektu ataku, alarmy w logach, ograniczenie
+skutków).
+Weryfikacja / zatwierdzenie etapu 2:
+• obowiązkowa konsultacja/odbiór (krótka obrona planu – 5–10 min):
+o prowadzący sprawdza spójność topologii, adresacji i scenariuszy,
+o wskazuje braki/poprawki,
+o zatwierdzenie etapu = dopiero wtedy realizujecie finalną dokumentację.
+Etap 3 (61–90 dni): Kompletna dokumentacja końcowa
+Co oddajecie:
+• Kompletna dokumentacja PDF zawierająca co najmniej:
+1. Wstęp i cel projektu (krótko)
+2. Topologia + konfiguracja (z rysunkiem, tabelą adresacji i opisem ról)
+3. Realizacja ataku (opis + dowody: zrzuty/logi/pcap/wyniki poleceń)
+4. Wdrożone zabezpieczenia (opis + fragmenty konfiguracji/komend)
+5. Ponowny atak po zabezpieczeniach (wynik + porównanie z pierwszym atakiem)
+6. Wnioski i rekomendacje (co działa, co nie, co można poprawić)
+Załączniki (zalecane):
+• pliki konfiguracyjne (export/backup),
+• pcapy (jeśli analizowaliście ruch),
+• skrypty/komendy,
+• opcjonalnie krótki film demo.
+Weryfikacja etapu 3 (zaliczenie):
+• ocena dokumentacji + (jeśli ustalisz) krótkie omówienie/demonstracja.
+Ocena:
+• Etap 1 (wybór tematu i wykonalność): 10 pkt
+• Etap 2 (plan pracy: topologia + adresacja + scenariusze): 30 pkt
+• Etap 3 (dokumentacja + dowody + wnioski): 50 pkt
+• Organizacja pracy i czytelność (format, struktura, spójność): 10 pkt
+Bonus: wideo/demo +5–10 pkt (opcjonalnie)
+Zasady i uwagi organizacyjne
+• Brak zatwierdzenia etapu = brak przejścia do kolejnego.
+• Przekroczenie terminów etapów może obniżać ocenę końcową.
+• Plagiat / kopiowanie między grupami = dyskwalifikacja.
+• Projekt ma być wykonywany w środowisku kontrolowanym (lab/symulacja), a nie w realnej
+sieci produkcyjnej.
+
+12. Atak na OSPF – Fałszowanie tras (OSPF Route Injection)
+
+10–14. Ataki na RIP i OSPF
+• Fałszowanie tras RIP i OSPF
+• Atak DoS na RIP
+• Atak na OSPF Hello Packets
+ Narzędzia do ataku:
+• Scapy – tworzenie fałszywych pakietów RIP/OSPF.
+ Zabezpieczenie:
+• Wymuszenie autoryzacji RIP i OSPF.
