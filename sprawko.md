@@ -65,7 +65,138 @@ Efektem końcowym projektu jest spójna dokumentacja techniczna zawierająca opi
 <a id="sec-2"></a>
 ## 2. Topologia i środowisko
 
-_Sekcja do uzupełnienia._
+W projekcie przyjęto wariant laboratoryjny oparty o emulację sieci w środowisku **GNS3/EVE-NG** oraz routery logiczne oparte na systemie Linux z pakietem **FRRouting (FRR)**. Celem takiego wyboru jest uzyskanie środowiska wystarczająco realistycznego dla protokołu OSPF, a jednocześnie lekkiego sprzętowo i łatwego do odtworzenia przez członków zespołu.
+
+### 2.1. Uzasadnienie wyboru platformy
+
+W porównaniu do uproszczonych symulatorów, GNS3/EVE-NG z FRR pozwala:
+1. uruchomić rzeczywisty stos sieciowy Linux i realną implementację OSPF,
+2. wykonywać diagnostykę na poziomie usług routingu (`vtysh`, `show ip ospf neighbor`, `show ip route`, `show ip ospf database`),
+3. prowadzić analizę ruchu pakietowego narzędziami typu `tcpdump`/Wireshark,
+4. łatwo odtwarzać scenariusze ataku i obrony w kontrolowanym środowisku.
+
+To podejście zapewnia dobrą równowagę między realizmem technicznym a złożonością wdrożenia.
+
+### 2.2. Organizacja środowiska na dwóch komputerach
+
+Ze względu na dostępność dwóch stanowisk roboczych zastosowano podział ról:
+1. **Komputer A (host emulacji)**: uruchomienie GNS3/EVE-NG, wszystkich węzłów topologii oraz połączeń między nimi.
+2. **Komputer B (stacja operatorska/analityczna)**: dostęp administracyjny (SSH), wykonywanie testów łączności, przechwytywanie ruchu, dokumentowanie wyników.
+
+Taki podział zmniejsza obciążenie pojedynczego hosta i poprawia jakość dowodów technicznych (stabilniejsze logi, mniej zakłóceń podczas przechwytywania ruchu).
+
+Diagram organizacji pracy:
+
+```mermaid
+flowchart LR
+	subgraph A[Komputer A - Host emulacji]
+		EMU[GNS3 lub EVE-NG]
+		R1[R1 FRR]
+		R2[R2 FRR]
+		R3[R3 FRR]
+		RA[R-ATTACK FRR]
+		EMU --> R1
+		EMU --> R2
+		EMU --> R3
+		EMU --> RA
+	end
+
+	subgraph B[Komputer B - Stacja operatorska]
+		SSH[SSH]
+		CAP[Wireshark lub tcpdump]
+		DOC[Dokumentacja i logi]
+	end
+
+	B -->|zarzadzanie i testy| A
+```
+
+### 2.3. Model topologii logicznej
+
+Topologia testowa została zaprojektowana jako liniowy rdzeń OSPF z dodatkowym węzłem atakującym:
+
+`PC1 -> R1 -> R2 -> R3 -> PC2`
+
+oraz dodatkowe połączenie:
+
+`R-ATTACK -> R2`
+
+Założenia funkcjonalne:
+1. R1, R2 i R3 tworzą poprawną domenę OSPF i wymieniają trasy w trybie bazowym.
+2. PC1 oraz PC2 reprezentują hosty końcowe wykorzystywane do testów osiągalności i kierunku ruchu.
+3. R-ATTACK reprezentuje nieautoryzowane urządzenie próbujące wpłynąć na proces routingu przez route injection.
+
+Diagram topologii logicznej:
+
+```mermaid
+flowchart LR
+	PC1[PC1 LAN] --> R1[R1]
+	R1 --> R2[R2]
+	R2 --> R3[R3]
+	R3 --> PC2[PC2 LAN]
+	RA[R-ATTACK] --> R2
+
+	R1 ---|OSPF area 0| R2
+	R2 ---|OSPF area 0| R3
+```
+
+### 2.4. Komponenty środowiska
+
+W środowisku wykorzystano następujące klasy węzłów:
+1. **Routery legalne (R1, R2, R3)**: Linux + FRR, obsługa OSPF w obszarze testowym.
+2. **Router atakujący (R-ATTACK)**: Linux + FRR, konfiguracja wykorzystywana do publikacji fałszywych lub niepożądanych informacji routingu.
+3. **Hosty testowe (PC1, PC2)**: endpointy do testów ping/traceroute i potwierdzania ścieżek ruchu.
+4. **Narzędzia analityczne**: `tcpdump`, Wireshark, logi FRR, komendy diagnostyczne OSPF.
+
+### 2.5. Wymagania sprzętowe i programowe
+
+Minimalne wymagania dla wariantu projektu:
+1. CPU: 4 rdzenie x86_64 z obsługą wirtualizacji sprzętowej (VT-x/AMD-V).
+2. RAM: 8 GB.
+3. Dysk: 40-60 GB wolnego miejsca (zalecany SSD).
+4. System hosta: Linux/Windows/macOS.
+
+Zalecane wymagania dla komfortowej pracy:
+1. CPU: 6-8 rdzeni.
+2. RAM: 16 GB.
+3. Dysk: 100 GB SSD/NVMe.
+
+Wymagane oprogramowanie:
+1. GNS3 lub EVE-NG (zgodnie z preferencją zespołu).
+2. Obrazy Linux dla routerów logicznych z zainstalowanym FRRouting.
+3. Narzędzia diagnostyczne: Wireshark/tcpdump, klient SSH, podstawowe narzędzia sieciowe.
+
+### 2.6. Założenia operacyjne laboratorium
+
+Na potrzeby wiarygodności wyników przyjęto następujące założenia:
+1. testy realizowane są wyłącznie w środowisku odseparowanym od sieci produkcyjnych,
+2. czas systemowy na obu komputerach jest zsynchronizowany (spójność logów),
+3. konfiguracja bazowa jest utrwalana przed każdym etapem (snapshot/backup),
+4. porównanie wyników odbywa się w trzech stanach: przed atakiem, w trakcie ataku, po wdrożeniu zabezpieczeń,
+5. sukces ataku lub obrony jest potwierdzany co najmniej dwoma źródłami dowodowymi (routing + test łączności lub routing + LSDB).
+
+Diagram przebiegu eksperymentu:
+
+```mermaid
+flowchart TD
+	S0[Stan bazowy]
+	S1[Test lacznosci i trasy]
+	S2[Atak OSPF Route Injection]
+	S3[Zebranie dowodow]
+	S4[Wdrozenie zabezpieczen OSPF]
+	S5[Re-test ataku]
+	S6[Porownanie wynikow i wnioski]
+
+	S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6
+```
+
+### 2.7. Ograniczenia środowiska
+
+Należy uwzględnić, że środowisko laboratoryjne, mimo wysokiej przydatności dydaktycznej, ma ograniczenia:
+1. wydajność i opóźnienia zależą od zasobów hosta,
+2. część zachowań może różnić się od urządzeń produkcyjnych klasy enterprise,
+3. wyniki należy interpretować jako reprezentatywne dla badanego scenariusza, a nie jako pełny model każdej sieci produkcyjnej.
+
+Mimo tych ograniczeń wybrana platforma jest adekwatna do realizacji celu projektu, ponieważ pozwala rzetelnie prześledzić mechanizm OSPF Route Injection oraz zweryfikować skuteczność zabezpieczenia opartego na uwierzytelnianiu OSPF.
 
 <a id="sec-3"></a>
 ## 3. Adresacja i role urządzeń

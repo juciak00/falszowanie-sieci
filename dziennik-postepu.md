@@ -76,3 +76,31 @@
 
 ### Nastepny krok
 - Uzupelnic sekcje 2: topologia, urzadzenia, role i zalozenia srodowiska laboratoryjnego.
+
+---
+
+## 2026-03-28 (aktualizacja 6)
+
+### Co zostalo zrobione
+- Uzgodniono wariant realizacji: GNS3/EVE-NG + FRRouting (routery Linux) na dwoch komputerach.
+- Rozpisano szczegolowo punkt 2 w czystopisie, w tym: uzasadnienie wyboru, model topologii, podzial rol miedzy komputerami, komponenty, wymagania sprzetowe/programowe, zalozenia operacyjne i ograniczenia.
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 3 (Adresacja i role urzadzen) zgodnie z topologia i wybranym wariantem laboratoryjnym.
+
+---
+
+## 2026-03-28 (aktualizacja 7)
+
+### Co zostalo zrobione
+- Dodano diagramy Mermaid do sekcji 2 w czystopisie.
+- Wstawiono trzy wizualizacje: podzial rol na dwa komputery, topologie logiczna OSPF oraz przeplyw etapow eksperymentu.
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 3 (adresacja i mapa interfejsow) w formie tabeli technicznej.
