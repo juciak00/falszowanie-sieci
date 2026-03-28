@@ -1,191 +1,89 @@
-# Projekt: OSPF Route Injection
+# Projekt zaliczeniowy
 
-## Pomysł na projekt
-**Atak na OSPF – Fałszowanie tras (OSPF Route Injection)**
+## 12. Atak na OSPF - Fałszowanie tras (OSPF Route Injection)
 
----
+### Kierunek: Bezpieczeństwo sieci
 
-## Cel projektu
-Celem projektu jest pokazanie, jak atakujący może wstrzyknąć fałszywe informacje routingu do protokołu OSPF, powodując zmianę tras w sieci, a następnie wdrożenie zabezpieczenia w postaci uwierzytelniania OSPF, które blokuje taki atak.
+### Autorzy
+- Karol Ziobro
+- Julia Jarząb
 
----
-
-## 1. Środowisko
-
-**Symulacja:**
-- Cisco Packet Tracer
-
-**Urządzenia:**
-- 3 routery
-- 2 hosty PC
-- 1 router atakujący
+### Data
+2026-03-28
 
 ---
 
-## 2. Topologia
-PC1 ----- R1 ----- R2 ----- R3 ----- PC2
-|
-R-ATTACK
+## Spis treści
 
-**Opis urządzeń:**
-
-| Urządzenie | Rola |
-|-----------|------|
-| PC1 | host w sieci 1 |
-| PC2 | host w sieci 2 |
-| R1 | router brzegowy |
-| R2 | router centralny |
-| R3 | router brzegowy |
-| R-ATTACK | router atakujący |
+1. [Wstęp i cel projektu](#sec-1)
+2. [Topologia i środowisko](#sec-2)
+3. [Adresacja i role urządzeń](#sec-3)
+4. [Scenariusz ataku: OSPF Route Injection](#sec-4)
+5. [Wdrożone zabezpieczenia OSPF](#sec-5)
+6. [Re-test po wdrożeniu zabezpieczeń](#sec-6)
+7. [Dowody i wyniki testów](#sec-7)
+8. [Wnioski i rekomendacje](#sec-8)
+9. [Załączniki](#sec-9)
 
 ---
 
-## 3. Adresacja
+<a id="sec-1"></a>
+## 1. Wstęp i cel projektu
 
-| Sieć | Adres |
-|------|------|
-| PC1 LAN | 192.168.1.0/24 |
-| PC2 LAN | 192.168.2.0/24 |
-| R1-R2 | 10.0.12.0/30 |
-| R2-R3 | 10.0.23.0/30 |
-| R2-Attack | 10.0.24.0/30 |
+Protokół OSPF (Open Shortest Path First) jest jednym z najczęściej stosowanych protokołów routingu wewnętrznego (IGP) w sieciach przedsiębiorstw. Działa dynamicznie, szybko reaguje na zmiany topologii i na podstawie metryk wybiera najkorzystniejsze trasy pomiędzy segmentami sieci. Z tego względu integralność informacji wymienianych pomiędzy sąsiadami OSPF ma kluczowe znaczenie dla stabilności i bezpieczeństwa całej infrastruktury.
 
-**Routery:**
+W praktyce, jeżeli domena OSPF nie jest odpowiednio zabezpieczona, możliwe staje się dołączenie nieautoryzowanego urządzenia i wprowadzenie do procesu routingu fałszywych informacji o trasach. Taki scenariusz, określany jako **OSPF Route Injection**, może doprowadzić do nieprawidłowego przekierowania ruchu, utworzenia trasy typu blackhole, podsłuchu transmisji (man-in-the-middle) lub czasowej niedostępności usług. Skutki takiego ataku mogą objąć zarówno pojedynczy segment, jak i większą część sieci, zależnie od miejsca wstrzyknięcia oraz zaufania pomiędzy routerami.
 
-| Router | IP |
-|--------|----|
-| R1 | 10.0.12.1 |
-| R2 | 10.0.12.2 |
-| R3 | 10.0.23.2 |
-| Attack | 10.0.24.2 |
+Niniejszy projekt ma charakter praktyczny i laboratoryjny. Jego celem nie jest wyłącznie opis teoretyczny zagrożenia, ale przede wszystkim przeprowadzenie pełnego cyklu testowego: od poprawnie działającej sieci bazowej, przez kontrolowany atak, aż po wdrożenie zabezpieczenia i weryfikację jego skuteczności. Podejście to pozwala ocenić zarówno podatność środowiska, jak i realny efekt zastosowanych mechanizmów ochronnych.
 
----
+Cele szczegółowe projektu:
+1. Przygotowanie topologii testowej z wykorzystaniem routingu OSPF oraz zdefiniowanie ról urządzeń (routery legalne, hosty końcowe, węzeł atakujący).
+2. Udokumentowanie stanu początkowego sieci, w tym poprawnej wymiany tras i osiągalności hostów.
+3. Realizacja ataku Route Injection poprzez wprowadzenie fałszywej informacji routingu i obserwacja zmian w tablicach routingu.
+4. Zebranie dowodów technicznych (komendy diagnostyczne, zrzuty konfiguracji, wyniki testów łączności) potwierdzających wpływ ataku.
+5. Wdrożenie mechanizmu ochronnego w OSPF (uwierzytelnianie sąsiedztwa) oraz ponowne uruchomienie testu ataku.
+6. Porównanie wyników przed i po zabezpieczeniu, wraz z oceną skuteczności i ograniczeń zastosowanej ochrony.
 
-## 4. Normalna konfiguracja OSPF
+Zakres pracy obejmuje wyłącznie środowisko kontrolowane, przygotowane na potrzeby ćwiczenia akademickiego. Wszystkie działania są wykonywane w celu demonstracji ryzyk bezpieczeństwa i opracowania dobrych praktyk obronnych, a nie do zastosowań poza laboratorium.
 
-```bash
-router ospf 1
-network 10.0.0.0 0.0.255.255 area 0
-network 192.168.1.0 0.0.0.255 area 0
+Efektem końcowym projektu jest spójna dokumentacja techniczna zawierająca opis topologii, konfiguracji, przebiegu ataku, metod zabezpieczenia oraz wyników re-testu. Dokumentacja ta stanowi podstawę do sformułowania praktycznych wniosków i rekomendacji dotyczących ochrony protokołu OSPF przed fałszowaniem tras.
 
-Test:
-PC1 -> ping -> PC2
-show ip route
+<a id="sec-2"></a>
+## 2. Topologia i środowisko
 
-5. Scenariusz ataku (Route Injection)
+_Sekcja do uzupełnienia._
 
-Atakujący router:
+<a id="sec-3"></a>
+## 3. Adresacja i role urządzeń
 
-Dołącza do OSPF
+_Sekcja do uzupełnienia._
 
-Rozgłasza fałszywą sieć
+<a id="sec-4"></a>
+## 4. Scenariusz ataku: OSPF Route Injection
 
-5. Scenariusz ataku (Route Injection)
+_Sekcja do uzupełnienia._
 
-Atakujący router:
+<a id="sec-5"></a>
+## 5. Wdrożone zabezpieczenia OSPF
 
-Dołącza do OSPF
+_Sekcja do uzupełnienia._
 
-Rozgłasza fałszywą sieć
+<a id="sec-6"></a>
+## 6. Re-test po wdrożeniu zabezpieczeń
 
-router ospf 1
-network 10.0.24.0 0.0.0.3 area 0
-redistribute connected
+_Sekcja do uzupełnienia._
 
-interface loopback0
-ip address 192.168.2.1 255.255.255.0
+<a id="sec-7"></a>
+## 7. Dowody i wyniki testów
 
-Efekt:
+_Sekcja do uzupełnienia._
 
-Routery uznają, że atakujący ma lepszą trasę do sieci PC2
+<a id="sec-8"></a>
+## 8. Wnioski i rekomendacje
 
-Skutek ataku
+_Sekcja do uzupełnienia._
 
-Ruch przechodzi przez R-ATTACK, który może:
+<a id="sec-9"></a>
+## 9. Załączniki
 
-przechwycić ruch
-
-zablokować ruch
-
-zmienić routing
-
-6. Dowody ataku
-
-Komendy:
-show ip ospf neighbor
-show ip route
-show ip ospf database
-
-Do pokazania:
-
-tablica routingu przed atakiem
-
-tablica routingu po ataku
-
-zmiana next-hop
-
-7. Zabezpieczenie
-
-OSPF MD5 Authentication
-
-interface g0/0
-ip ospf message-digest-key 1 md5 cisco123
-
-router ospf 1
-area 0 authentication message-digest
-
-Efekt:
-Router przyjmuje tylko pakiety z poprawnym hasłem
-
-Atakujący nie może się podłączyć
-
-8. Powtórzenie ataku
-
-Efekt:
-
-brak sąsiedztwa OSPF
-
-brak fałszywych tras
-
-Sprawdzenie:
-
-show ip ospf neighbor
-9. Wynik projektu
-Etap	Efekt
-przed atakiem	normalny routing
-atak	fałszywa trasa OSPF
-po zabezpieczeniu	router atakujący odrzucony
-10. Artefakty do dokumentacji
-
-Screenshots:
-
-topologia
-
-konfiguracja routerów
-
-show ip route
-
-show ip ospf neighbor
-
-wynik ping
-
-brak sąsiedztwa po zabezpieczeniu
-
-11. Bonus (opcjonalnie)
-
-zmiana metric / cost w ataku
-
-pokazanie blackhole routing
-
-analiza pakietów w Simulation Mode (Packet Tracer)
-
-12. Gotowy opis (Etap 1)
-
-Temat:
-Atak na protokół OSPF – fałszowanie tras (OSPF Route Injection)
-
-Środowisko:
-Cisco Packet Tracer
-
-Opis:
-Projekt polega na zaprojektowaniu topologii sieci wykorzystującej protokół routingu OSPF. W pierwszej części zostanie przeprowadzony atak polegający na wstrzyknięciu fałszywych informacji routingu przez złośliwy router. Następnie zostanie wdrożone zabezpieczenie w postaci autoryzacji OSPF (MD5), które ma uniemożliwić przyłączenie się nieautoryzowanego urządzenia do domeny routingu. Na końcu atak zostanie powtórzony w celu potwierdzenia skuteczności zabezpieczenia.
+_Sekcja do uzupełnienia._
