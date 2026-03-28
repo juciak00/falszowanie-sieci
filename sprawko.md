@@ -198,15 +198,281 @@ Należy uwzględnić, że środowisko laboratoryjne, mimo wysokiej przydatności
 
 Mimo tych ograniczeń wybrana platforma jest adekwatna do realizacji celu projektu, ponieważ pozwala rzetelnie prześledzić mechanizm OSPF Route Injection oraz zweryfikować skuteczność zabezpieczenia opartego na uwierzytelnianiu OSPF.
 
+### 2.8. Architektura FRRouting w laboratorium
+
+Węzły routerowe oparte na FRRouting działają jako usługi użytkownika systemu Linux. Oznacza to, że warstwa przekazywania pakietów jest realizowana przez jądro systemu operacyjnego, natomiast logika protokołu OSPF przez procesy FRR. W praktyce umożliwia to bardzo precyzyjną diagnostykę: z jednej strony obserwujemy stan protokołu routingu, a z drugiej faktyczne wpisy tras w tablicy kernela.
+
+W środowisku przyjęto podejście z rozdzieleniem odpowiedzialności:
+1. Linux odpowiada za interfejsy, adresację IP i forwarding.
+2. FRR odpowiada za wymianę informacji OSPF, utrzymanie LSDB oraz kalkulację SPF.
+3. Narzędzia diagnostyczne weryfikują zgodność pomiędzy stanem OSPF i faktyczną ścieżką ruchu.
+
+Taki model jest korzystny dydaktycznie, ponieważ pozwala łatwo wykazać zależność pomiędzy komunikatami OSPF a konsekwencjami w ruchu produkcyjnym. Jeśli pojawia się trasa błędna lub niepożądana, można prześledzić jej genezę od poziomu sąsiedztwa aż do efektu na hostach końcowych.
+
+### 2.9. Plan uruchomienia i walidacji środowiska
+
+Aby utrzymać powtarzalność, środowisko uruchamiane jest według stałej procedury:
+1. Start platformy emulacyjnej (GNS3/EVE-NG) i wczytanie zapisanej topologii.
+2. Uruchomienie routerów legalnych R1, R2, R3 oraz hostów końcowych PC1 i PC2.
+3. Weryfikacja poprawności adresacji i routingu bazowego.
+4. Dopiero po potwierdzeniu stanu bazowego uruchomienie węzła R-ATTACK.
+5. Rejestracja wyników poleceń kontrolnych przed rozpoczęciem ataku.
+
+Wstępna walidacja środowiska obejmuje:
+1. sprawdzenie stanu interfejsów i adresacji na każdym routerze,
+2. sprawdzenie sąsiedztwa OSPF pomiędzy R1-R2-R3,
+3. sprawdzenie dostępności PC1 <-> PC2,
+4. zapis tablic routingu jako punktu odniesienia dla kolejnych etapów.
+
+Dzięki takiemu podejściu możliwe jest ograniczenie błędów metodycznych. Jeżeli w późniejszym etapie wystąpi anomalia, można jednoznacznie określić, czy wynika ona z działania ataku, czy z wcześniejszej niepoprawnej konfiguracji bazowej.
+
+### 2.10. Kryteria jakości i powtarzalności wyników
+
+W projekcie przyjęto, że każdy istotny efekt musi być potwierdzony wielokrotnie i z różnych perspektyw. Ogranicza to ryzyko wyciągania wniosków na podstawie pojedynczego, przypadkowego pomiaru.
+
+Kryteria jakości pomiarów:
+1. Każdy etap (przed atakiem, atak, po zabezpieczeniu) zawiera zestaw tych samych testów porównawczych.
+2. Wnioski opierają się jednocześnie na danych z warstwy routingu oraz testach end-to-end.
+3. Wyniki są rejestrowane w formie umożliwiającej odtworzenie (zrzuty, logi, komendy, timestampy).
+4. Dla kluczowych obserwacji wykonywany jest test powtórny.
+
+Kryteria uznania etapu za zakończony:
+1. Stan bazowy: pełna osiągalność hostów i stabilne sąsiedztwa OSPF.
+2. Etap ataku: potwierdzona zmiana decyzji routingu wynikająca z route injection.
+3. Etap zabezpieczenia: brak możliwości skutecznego powtórzenia tej samej manipulacji trasami.
+
+Dodatkowo założono dokumentowanie potencjalnych zakłóceń pomiaru, takich jak chwilowa rekonwergencja protokołu, opóźnienia po stronie hosta emulacji czy restart usług. Informacje te są niezbędne, aby odróżnić zachowanie wynikające z badanego scenariusza od artefaktów środowiskowych.
+
+### 2.11. Scenariusze błędów środowiskowych i ich kontrola
+
+W praktycznych laboratoriach sieciowych częstym problemem są błędy niezwiązane bezpośrednio z badanym atakiem. W celu ograniczenia takich sytuacji zdefiniowano podstawowe scenariusze kontrolne:
+1. Brak sąsiedztwa OSPF z powodów konfiguracyjnych (niespójne area, maska, parametry interfejsu).
+2. Niespójna adresacja między hostami i routerami.
+3. Wyłączony forwarding IP na routerze Linux.
+4. Błędna kolejność uruchamiania usług FRR.
+
+Dla każdego z tych przypadków stosowana jest szybka checklista diagnostyczna, uruchamiana przed właściwą próbą ataku. Pozwala to skrócić czas debugowania i zwiększyć wiarygodność części eksperymentalnej raportu.
+
+Przyjęcie opisanych procedur powoduje, że punkt 2 nie jest wyłącznie opisem statycznej topologii, ale pełnym opisem warunków badawczych, w których wyniki eksperymentu są technicznie uzasadnione i porównywalne.
+
 <a id="sec-3"></a>
 ## 3. Adresacja i role urządzeń
 
-_Sekcja do uzupełnienia._
+W tej sekcji zdefiniowano szczegółowy plan adresacji IP, mapę interfejsów oraz role wszystkich urządzeń uczestniczących w laboratorium. Przyjęto adresację prywatną RFC1918 oraz logiczny podział na segmenty punkt-punkt i sieci LAN hostów końcowych.
+
+### 3.1. Założenia adresacyjne
+
+Projekt wykorzystuje trzy typy segmentów:
+1. Łącza punkt-punkt pomiędzy routerami (podsiec /30).
+2. Sieci dostępowe LAN dla hostów końcowych (podsiec /24).
+3. Dodatkowy segment dla routera atakującego (podsiec /30).
+
+Przyjęto następujące zasady:
+1. Każde łącze router-router ma oddzielną podsieć /30.
+2. Każdy host końcowy znajduje się w osobnej podsieci LAN.
+3. Routery legalne pracują w jednej domenie OSPF (area 0).
+4. Router atakujący jest fizycznie podłączony do R2 i logicznie przygotowany do prób route injection.
+
+### 3.2. Tabela podsieci
+
+| Segment | Adres sieci | Maska | Zakres hostów | Przeznaczenie |
+|---|---|---|---|---|
+| LAN-PC1 | 192.168.1.0 | /24 | 192.168.1.1-192.168.1.254 | Sieć hosta PC1 |
+| R1-R2 | 10.0.12.0 | /30 | 10.0.12.1-10.0.12.2 | Łącze punkt-punkt R1-R2 |
+| R2-R3 | 10.0.23.0 | /30 | 10.0.23.1-10.0.23.2 | Łącze punkt-punkt R2-R3 |
+| R2-ATTACK | 10.0.24.0 | /30 | 10.0.24.1-10.0.24.2 | Łącze punkt-punkt R2-R-ATTACK |
+| LAN-PC2 | 192.168.2.0 | /24 | 192.168.2.1-192.168.2.254 | Sieć hosta PC2 |
+| TEST-INJECT | 172.16.200.0 | /24 | 172.16.200.1-172.16.200.254 | Prefiks testowy do demonstracji route injection |
+
+### 3.3. Mapa interfejsów routerów
+
+Nazwy interfejsów mogą się różnić zależnie od obrazu Linux (np. `ethX`, `ensX`). W dokumentacji stosowana jest nazwa logiczna IF1/IF2/IF3 dla czytelności.
+
+| Urządzenie | Interfejs logiczny | Adres IP | Maska | Połączony z |
+|---|---|---|---|---|
+| R1 | IF1 (LAN) | 192.168.1.1 | /24 | PC1 |
+| R1 | IF2 | 10.0.12.1 | /30 | R2 |
+| R2 | IF1 | 10.0.12.2 | /30 | R1 |
+| R2 | IF2 | 10.0.23.1 | /30 | R3 |
+| R2 | IF3 | 10.0.24.1 | /30 | R-ATTACK |
+| R3 | IF1 | 10.0.23.2 | /30 | R2 |
+| R3 | IF2 (LAN) | 192.168.2.1 | /24 | PC2 |
+| R-ATTACK | IF1 | 10.0.24.2 | /30 | R2 |
+
+### 3.4. Konfiguracja hostów końcowych
+
+| Host | Adres IP | Maska | Brama domyślna | Rola testowa |
+|---|---|---|---|---|
+| PC1 | 192.168.1.10 | /24 | 192.168.1.1 | Host źródłowy do testów ping/traceroute |
+| PC2 | 192.168.2.10 | /24 | 192.168.2.1 | Host docelowy do testów osiągalności |
+
+### 3.5. Role urządzeń w eksperymencie
+
+| Urządzenie | Rola operacyjna | Funkcja w scenariuszu |
+|---|---|---|
+| R1 | Router brzegowy (strona źródłowa) | Dostarcza ruch z LAN-PC1 do domeny OSPF |
+| R2 | Router centralny | Punkt tranzytowy i punkt styku z R-ATTACK |
+| R3 | Router brzegowy (strona docelowa) | Dostarcza ruch do LAN-PC2 |
+| R-ATTACK | Węzeł nieautoryzowany | Próby publikacji fałszywych tras/prefiksów |
+| PC1 | Host testowy A | Generowanie ruchu testowego i pomiary przed/po ataku |
+| PC2 | Host testowy B | Odbiór ruchu i potwierdzanie dostępności usług |
+
+### 3.6. Parametry OSPF powiązane z adresacją
+
+W stanie bazowym OSPF obejmuje legalne interfejsy R1-R2-R3. Dla przejrzystości i ograniczenia wpływu zmiennych zewnętrznych przyjęto:
+1. Jeden obszar routingu: area 0.
+2. Reklamację sieci tranzytowych oraz sieci LAN hostów końcowych.
+3. Brak redystrybucji tras zewnętrznych w stanie bazowym.
+
+Taki układ upraszcza analizę zmian i pozwala jednoznacznie wykazać wpływ route injection na tablice routingu.
+
+### 3.7. Diagram adresacji (Mermaid)
+
+```mermaid
+flowchart LR
+	PC1[PC1 192.168.1.10/24<br/>GW 192.168.1.1] --> R1[R1<br/>IF1 192.168.1.1/24<br/>IF2 10.0.12.1/30]
+	R1 --> R2[R2<br/>IF1 10.0.12.2/30<br/>IF2 10.0.23.1/30<br/>IF3 10.0.24.1/30]
+	R2 --> R3[R3<br/>IF1 10.0.23.2/30<br/>IF2 192.168.2.1/24]
+	R3 --> PC2[PC2 192.168.2.10/24<br/>GW 192.168.2.1]
+	RA[R-ATTACK<br/>IF1 10.0.24.2/30] --> R2
+```
+
+### 3.8. Zakres danych do zebrania w etapie adresacji
+
+Aby zapewnić spójność dalszych etapów raportu, po wdrożeniu adresacji należy zarchiwizować:
+1. Stan interfejsów i adresów IP na wszystkich routerach.
+2. Tablice routingu w stanie bazowym.
+3. Potwierdzenie łączności PC1 -> PC2.
+4. Potwierdzenie sąsiedztwa OSPF wyłącznie między routerami legalnymi.
+
+Zebrane dane stanowią punkt odniesienia dla sekcji ataku, zabezpieczenia i re-testu.
 
 <a id="sec-4"></a>
 ## 4. Scenariusz ataku: OSPF Route Injection
 
-_Sekcja do uzupełnienia._
+Sekcja opisuje kontrolowany scenariusz ataku laboratoryjnego, którego celem jest wykazanie, jak nieautoryzowany węzeł może wpłynąć na decyzje routingu OSPF przez wstrzyknięcie tras. Wszystkie działania wykonywane są wyłącznie w izolowanym środowisku testowym.
+
+### 4.1. Cel etapu ataku
+
+Celem scenariusza jest:
+1. doprowadzenie do sytuacji, w której routery legalne zaakceptują informacje routingu pochodzące od R-ATTACK,
+2. wywołanie mierzalnej zmiany w tablicach routingu,
+3. potwierdzenie skutku ataku na poziomie testów end-to-end (ping/traceroute),
+4. zebranie materiału dowodowego do porównania z etapem po wdrożeniu zabezpieczeń.
+
+### 4.2. Warunki wejściowe (stan bazowy)
+
+Przed rozpoczęciem ataku wymagane jest potwierdzenie, że środowisko działa poprawnie:
+1. Sąsiedztwo OSPF pomiędzy R1-R2-R3 jest stabilne.
+2. Trasa między LAN-PC1 i LAN-PC2 działa poprawnie.
+3. W tablicach routingu nie występują prefiksy testowe od R-ATTACK.
+4. R-ATTACK ma łączność warstwy 3 z interfejsem R2 na segmencie 10.0.24.0/30.
+
+Minimalny zestaw poleceń kontrolnych (na routerach legalnych):
+
+```bash
+show ip ospf neighbor
+show ip route
+show ip ospf database
+```
+
+### 4.3. Założenie ataku
+
+Wariant ataku zakłada, że R-ATTACK próbuje dołączyć do domeny OSPF i rozgłosić prefiks, który wpłynie na wybór ścieżki przez routery legalne. W laboratorium używany jest prefiks testowy `172.16.200.0/24`, aby jednoznacznie odróżnić wpływ ataku od tras produkcyjnych w topologii.
+
+W zależności od konfiguracji bazowej, atak może mieć dwie formy:
+1. Publikacja dodatkowej trasy zewnętrznej (route injection do LSDB).
+2. Reklama prefiksu, który konkuruje metryką i zmienia preferowany next-hop.
+
+### 4.4. Kroki wykonania ataku (lab)
+
+#### Krok 1: Aktywacja OSPF na R-ATTACK
+Na routerze R-ATTACK uruchamiany jest proces OSPF dla interfejsu łączącego z R2.
+
+#### Krok 2: Przygotowanie prefiksu testowego
+Tworzony jest lokalny prefiks testowy (np. interfejs loopback), który następnie może zostać rozgłoszony do OSPF.
+
+#### Krok 3: Wstrzyknięcie trasy
+R-ATTACK rozpoczyna reklamowanie prefiksu testowego do domeny OSPF zgodnie z przyjętą techniką laboratoryjną.
+
+#### Krok 4: Obserwacja konwergencji
+Na R1, R2 i R3 monitorowane są:
+1. zmiany sąsiedztwa OSPF,
+2. pojawienie się nowego prefiksu w tablicach routingu,
+3. zmiany next-hop dla analizowanego ruchu.
+
+#### Krok 5: Test ruchu hostów końcowych
+Z PC1 wykonywane są testy do PC2 i do prefiksu testowego. Dodatkowo wykonywany jest traceroute w celu weryfikacji ścieżki.
+
+### 4.5. Przykładowy szkielet konfiguracji na R-ATTACK (FRR)
+
+Poniższy fragment przedstawia poglądowy szkielet konfiguracji wykorzystywany w laboratorium:
+
+```bash
+router ospf
+ network 10.0.24.0/30 area 0
+
+interface lo
+ ip address 172.16.200.1/24
+
+router ospf
+ redistribute connected
+```
+
+Uwaga: finalna konfiguracja może różnić się nazwami interfejsów i składnią zależnie od użytego obrazu Linux/FRR.
+
+### 4.6. Oczekiwane artefakty po ataku
+
+Po wykonaniu scenariusza powinny zostać zebrane następujące dowody:
+1. Zrzuty `show ip ospf neighbor` z momentu zestawienia relacji z R-ATTACK.
+2. Zrzuty `show ip route` pokazujące pojawienie się prefiksu testowego.
+3. Zrzuty `show ip ospf database` potwierdzające reklamę LSA.
+4. Wyniki ping i traceroute przed oraz po ataku.
+5. (Opcjonalnie) pcap z interfejsu R2-R-ATTACK potwierdzający wymianę pakietów OSPF.
+
+### 4.7. Kryteria sukcesu ataku
+
+Atak uznaje się za skuteczny, jeżeli jednocześnie spełnione są warunki:
+1. Routery legalne akceptują informację OSPF pochodzącą od R-ATTACK.
+2. W tablicach routingu pojawia się prefiks testowy lub zmienia się preferowana ścieżka.
+3. Testy ruchu potwierdzają wpływ tej zmiany na rzeczywisty forwarding.
+
+Jeżeli zmiana występuje tylko w pojedynczym źródle danych (np. sam log bez zmiany routingu), etap nie jest uznawany za pełny sukces i wymaga ponownej walidacji.
+
+### 4.8. Kryteria niepowodzenia i diagnostyka
+
+Najczęstsze przyczyny niepowodzenia ataku w laboratorium:
+1. Brak pełnego sąsiedztwa OSPF (nieosiągnięty stan Full).
+2. Błędna adresacja lub brak aktywnego interfejsu na R-ATTACK.
+3. Brak rozgłaszania prefiksu testowego do procesu OSPF.
+4. Nadpisanie trasy przez bardziej preferowaną metrykę istniejącą w topologii.
+
+W takich przypadkach należy ponownie przejść checklistę z sekcji 2 i 3 oraz powtórzyć pomiary po przywróceniu stanu bazowego.
+
+### 4.9. Diagram przebiegu ataku (Mermaid)
+
+```mermaid
+sequenceDiagram
+	participant A as R-ATTACK
+	participant R2 as R2
+	participant R1 as R1
+	participant R3 as R3
+	participant H as PC1/PC2
+
+	A->>R2: Proba zestawienia sasiedztwa OSPF
+	R2->>R1: Synchronizacja LSDB
+	R2->>R3: Synchronizacja LSDB
+	A->>R2: Reklama prefiksu testowego 172.16.200.0/24
+	R2->>R1: Propagacja LSA
+	R2->>R3: Propagacja LSA
+	R1->>R1: Rekalkulacja SPF
+	R3->>R3: Rekalkulacja SPF
+	H->>H: Test ping/traceroute i potwierdzenie zmiany trasy
+```
+
+### 4.10. Wynik etapu
+
+Wyniki tego etapu są punktem odniesienia dla sekcji 5 i 6. Celem kolejnych kroków będzie wdrożenie mechanizmu ochrony OSPF oraz wykazanie, że analogiczna próba route injection przestaje być skuteczna po zastosowaniu zabezpieczenia.
 
 <a id="sec-5"></a>
 ## 5. Wdrożone zabezpieczenia OSPF

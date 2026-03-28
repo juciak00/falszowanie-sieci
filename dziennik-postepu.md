@@ -104,3 +104,45 @@
 
 ### Nastepny krok
 - Uzupelnic sekcje 3 (adresacja i mapa interfejsow) w formie tabeli technicznej.
+
+---
+
+## 2026-03-28 (aktualizacja 8)
+
+### Co zostalo zrobione
+- Rozszerzono punkt 2 do wiekszej objetosci i szczegolowosci (porownywalnej z przykladami).
+- Dodano podsekcje: architektura FRRouting, plan uruchomienia i walidacji, kryteria jakosci i powtarzalnosci, scenariusze bledow srodowiskowych.
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 3 o konkretna tabele adresacji i przypisanie interfejsow do R1, R2, R3, R-ATTACK, PC1 i PC2.
+
+---
+
+## 2026-03-28 (aktualizacja 9)
+
+### Co zostalo zrobione
+- Uzupelniono sekcje 3 (Adresacja i role urzadzen) w czystopisie.
+- Dodano: tabele podsieci, mape interfejsow routerow, konfiguracje hostow, role urzadzen, parametry OSPF powiazane z adresacja oraz diagram Mermaid adresacji.
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 4: scenariusz ataku OSPF Route Injection krok po kroku (stan bazowy, wykonanie, obserwacje, kryteria sukcesu).
+
+---
+
+## 2026-03-28 (aktualizacja 10)
+
+### Co zostalo zrobione
+- Uzupelniono sekcje 4 (Scenariusz ataku: OSPF Route Injection).
+- Dodano: warunki wejsciowe, kroki realizacji ataku, szkielet konfiguracji FRR, oczekiwane artefakty, kryteria sukcesu/niepowodzenia oraz diagram Mermaid (sequence diagram).
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 5 (Wdrozone zabezpieczenia OSPF) i opisac konfiguracje ochronna przed route injection.
