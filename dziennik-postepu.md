@@ -61,3 +61,18 @@
 
 ### Nastepny krok
 - Przejsc do sekcji 2 i opisac finalna topologie oraz srodowisko testowe.
+
+---
+
+## 2026-03-28 (aktualizacja 5)
+
+### Co zostalo zrobione
+- Dalsze rozszerzenie sekcji "Wstep i cel projektu" o teorie OSPF.
+- Dodano opis: LSDB, algorytm SPF (Dijkstry), rodzaj wplywu LSA, stany sasiedztwa OSPF oraz ryzyka przy braku granic zaufania.
+- Uzupelniono czesc metodologiczna o kryteria potwierdzania skutecznego route injection (routing, sasiedztwo, LSDB, testy lacznosci).
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Uzupelnic sekcje 2: topologia, urzadzenia, role i zalozenia srodowiska laboratoryjnego.
