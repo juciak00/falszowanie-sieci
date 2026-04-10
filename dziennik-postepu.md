@@ -146,3 +146,33 @@
 
 ### Nastepny krok
 - Uzupelnic sekcje 5 (Wdrozone zabezpieczenia OSPF) i opisac konfiguracje ochronna przed route injection.
+
+---
+
+## 2026-04-10
+
+### Co zostalo zrobione
+- Zmieniono wariant realizacji projektu z GNS3/EVE-NG + FRR na uproszczony scenariusz w Cisco Packet Tracer.
+- Przepisano sekcje techniczne w sprawko.md pod Packet Tracer i Cisco IOS: topologia, adresacja, scenariusz ataku, zabezpieczenie i re-test.
+- Uzupelniono dotychczas puste sekcje 5-9 (zabezpieczenia, re-test, wyniki, wnioski, zalaczniki).
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Przygotowac plik .pkt zgodny z opisem oraz uzupelnic raport o rzeczywiste zrzuty komend z Packet Tracer.
+
+---
+
+## 2026-04-10 (aktualizacja 2)
+
+### Co zostalo zrobione
+- Dodano do sprawko.md gotowe konfiguracje IOS 1:1 do wklejenia dla R1, R2, R3 i R-ATTACK (wariant przed zabezpieczeniem).
+- Dodano uzupelnienie konfiguracji ochronnej na R1 i R3 (MD5), aby komplet zabezpieczenia byl od razu wykonywalny.
+- Dodano krotka checklistę testow krok po kroku (stan bazowy -> atak -> ochrona -> re-test).
+
+### Pliki i artefakty
+- sprawko.md
+
+### Nastepny krok
+- Wykonac scenariusz w Packet Tracer i uzupelnic sekcje 7 o realne zrzuty polecen oraz wyniki ping/tracert.
