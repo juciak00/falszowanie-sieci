@@ -112,6 +112,12 @@ flowchart LR
 2. Porównywane są trzy stany: przed atakiem, w trakcie ataku, po zabezpieczeniu.
 3. Każdy wynik jest weryfikowany co najmniej dwiema metodami: tablica routingu + test łączności.
 
+### 2.5. Topologia wykonana w CPT
+
+Poniżej znajduje się finalna topologia przygotowana w Cisco Packet Tracer:
+
+![Topologia CPT](resources/topology.png)
+
 <a id="sec-3"></a>
 ## 3. Adresacja i role urządzeń
 

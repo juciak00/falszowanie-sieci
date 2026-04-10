@@ -176,3 +176,18 @@
 
 ### Nastepny krok
 - Wykonac scenariusz w Packet Tracer i uzupelnic sekcje 7 o realne zrzuty polecen oraz wyniki ping/tracert.
+
+---
+
+## 2026-04-10 (aktualizacja 3)
+
+### Co zostalo zrobione
+- Dodano do sekcji 2 w sprawko.md osadzony obraz finalnej topologii z Packet Tracer.
+- Wykorzystano plik resources/topology.png jako ilustracje gotowego ukladu urzadzen i polaczen.
+
+### Pliki i artefakty
+- sprawko.md
+- resources/topology.png
+
+### Nastepny krok
+- Uzupełnic sekcje 7 o kolejne dowody z etapu OSPF (sasiedztwo i trasy podczas ataku oraz po zabezpieczeniu).
