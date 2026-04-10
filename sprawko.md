@@ -384,7 +384,46 @@ write
 <a id="sec-7"></a>
 ## 7. Dowody i wyniki testów
 
-### 7.1. Tabela porównawcza
+### 7.1. Stan bazowy - adresy interfejsów (przed atakiem)
+
+#### R1
+```
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     192.168.1.1     YES manual up                    up 
+GigabitEthernet0/1     10.0.12.1       YES manual up                    up 
+GigabitEthernet0/2     unassigned      YES unset  administratively down down 
+Vlan1                  unassigned      YES unset  administratively down down
+```
+
+#### R2
+```
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     10.0.12.2       YES manual up                    up 
+GigabitEthernet0/1     10.0.23.1       YES manual up                    up 
+GigabitEthernet0/2     10.0.24.1       YES manual up                    up 
+Vlan1                  unassigned      YES unset  administratively down down
+```
+
+#### R3
+```
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     10.0.23.2       YES manual up                    up 
+GigabitEthernet0/1     192.168.2.1     YES manual up                    up 
+GigabitEthernet0/2     unassigned      YES unset  administratively down down 
+Vlan1                  unassigned      YES unset  administratively down down
+```
+
+#### R-ATTACK
+```
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     10.0.24.2       YES manual up                    up 
+GigabitEthernet0/1     unassigned      YES unset  administratively down down 
+GigabitEthernet0/2     unassigned      YES unset  administratively down down 
+Loopback0              172.16.200.1    YES manual up                    up 
+Vlan1                  unassigned      YES unset  administratively down down
+```
+
+### 7.2. Tabela porównawcza
 
 | Test | Przed atakiem | W trakcie ataku (bez ochrony) | Po wdrożeniu ochrony |
 |---|---|---|---|
@@ -393,14 +432,14 @@ write
 | Ping PC1 -> PC2 | Sukces | Sukces | Sukces |
 | Trasa do prefiksu testowego | Brak | Przez R2 do R-ATTACK | Brak trasy |
 
-### 7.2. Lista dowodów do załączenia
+### 7.3. Lista dowodów do załączenia
 
 1. Zrzut `show ip ospf neighbor` z etapu ataku.
 2. Zrzut `show ip route ospf` pokazujący `172.16.200.0/24`.
 3. Zrzut tych samych komend po zabezpieczeniu.
 4. Zrzut ekranu topologii w Packet Tracer.
 
-### 7.3. Krótka checklista testów (krok po kroku)
+### 7.4. Krótka checklista testów (krok po kroku)
 
 1. Stan bazowy:
 	- Na R2 wykonaj `show ip ospf neighbor` (tylko R1 i R3).
