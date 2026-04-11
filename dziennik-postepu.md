@@ -50,6 +50,63 @@
 
 ---
 
+## 2026-04-11
+
+### Co zostalo zrobione
+- Zweryfikowano stan bazowy (przed atakiem) sieci OSPF:
+  - R1, R2, R3 widzą nawzajem sąsiadów OSPF w stanie FULL.
+  - Brak sąsiada R-ATTACK na R2 (jest on jeszcze wył.).
+  - Brak trasy do 172.16.200.0/24 na routerach legalnych.
+  - Test ping PC1 → PC2 działa prawidłowo.
+- Dodano screeny stanu przed atakiem do sekcji 4.2 (Stan bazowy):
+  - R1_before.png
+  - R2_before.png
+  - R3_before.png
+  - PC1_ping.png
+
+### Pliki i artefakty
+- resources/R1_before.png, resources/R2_before.png, resources/R3_before.png, resources/PC1_ping.png
+- sprawko.md (aktualizacja sekcji 4.2)
+
+### Nastepny krok
+- Wykonac atak OSPF Route Injection (uruchomić OSPF na R-ATTACK).
+- Zebrać screeny ze stanu ataku.
+- Dodać je do sekcji 4.4 ("Oczekiwany efekt ataku").
+
+---
+
+## 2026-04-11 (aktualizacja 2)
+
+### Co zostalo zrobione
+- Dodano screeny stanu po zabezpieczeniu do sekcji 6.2 w sprawko.md:
+  - R2_secured.png
+  - R1_secured.png
+  - R3_secured.png
+  - PC1_ping_secured.png
+
+### Pliki i artefakty
+- resources/R2_secured.png, resources/R1_secured.png, resources/R3_secured.png, resources/PC1_ping_secured.png
+- sprawko.md (aktualizacja sekcji 6.2)
+
+### Nastepny krok
+- Dokończyć weryfikację re-testu i, jeśli wynik jest zgodny, uzupełnić sekcję 7 o finalne zestawienie dowodów.
+
+---
+
+## 2026-04-11 (aktualizacja 3)
+
+### Co zostalo zrobione
+- Dodano obszerne podsumowanie końcowe do sekcji 8 w sprawko.md.
+- Podsumowanie obejmuje pełny cykl: stan bazowy, atak, skutki route injection, zabezpieczenie MD5/passive-interface oraz wynik re-testu.
+
+### Pliki i artefakty
+- sprawko.md (aktualizacja sekcji 8)
+
+### Nastepny krok
+- Jeśli trzeba, dopracować jeszcze styl końcówki raportu lub przygotować wersję pod eksport do PDF.
+
+---
+
 ## 2026-03-28 (aktualizacja 4)
 
 ### Co zostalo zrobione

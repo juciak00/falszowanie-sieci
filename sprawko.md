@@ -186,6 +186,24 @@ show ip route ospf
 show ip protocols
 ```
 
+#### Dowody stanu bazowego
+
+**R1 (przed atakiem):**
+
+![Stan R1 przed atakiem](resources/R1_before.png)
+
+**R2 (przed atakiem):**
+
+![Stan R2 przed atakiem](resources/R2_before.png)
+
+**R3 (przed atakiem):**
+
+![Stan R3 przed atakiem](resources/R3_before.png)
+
+**Test ping PC1 → PC2:**
+
+![Ping PC1 do PC2](resources/PC1_ping.png)
+
 ### 4.3. Realizacja ataku
 
 Na R-ATTACK uruchamiany jest OSPF i reklamowana jest sieć `10.0.24.0/30` oraz loopback `172.16.200.0/24`.
@@ -213,6 +231,24 @@ write
 1. Na R2 pojawia się sąsiedztwo OSPF z R-ATTACK.
 2. Na R1 i R3 pojawia się trasa OSPF do `172.16.200.0/24`.
 3. Traceroute z legalnej części sieci pokazuje przejście przez R2 do R-ATTACK dla tego prefiksu.
+
+#### Dowody efektu ataku
+
+**R2 (stan podczas ataku) - sąsiedztwo OSPF:**
+
+![Stan R2 podczas ataku - sąsiedztwo](resources/R2_attack.png)
+
+**R1 (stan podczas ataku) - tablice routingu:**
+
+![Stan R1 podczas ataku - trasy](resources/R1_attack.png)
+
+**R3 (stan podczas ataku) - tablice routingu:**
+
+![Stan R3 podczas ataku - trasy](resources/R3_attack.png)
+
+**Test tracert z PC1 do prefiksu atakującego (172.16.200.1):**
+
+![Tracert через R2 do R-ATTACK](resources/PC1_tracert_attack.png)
 
 ### 4.5. Kryteria sukcesu
 
@@ -387,6 +423,24 @@ write
 2. Brak trasy OSPF do `172.16.200.0/24` na R1 i R3.
 3. Ruch do prefiksu testowego jest niedostępny (co w tym scenariuszu oznacza skuteczną ochronę).
 
+#### Dowody po zabezpieczeniu
+
+**R2 (po zabezpieczeniu) - sąsiedztwo OSPF i trasy:**
+
+![R2 po zabezpieczeniu](resources/R2_secured.png)
+
+**R1 (po zabezpieczeniu) - trasy OSPF:**
+
+![R1 po zabezpieczeniu](resources/R1_secured.png)
+
+**R3 (po zabezpieczeniu) - trasy OSPF:**
+
+![R3 po zabezpieczeniu](resources/R3_secured.png)
+
+**Test ping z PC1 do 172.16.200.1 po zabezpieczeniu:**
+
+![Ping PC1 po zabezpieczeniu](resources/PC1_ping_secured.png)
+
 <a id="sec-7"></a>
 ## 7. Dowody i wyniki testów
 
@@ -462,6 +516,20 @@ Vlan1                  unassigned      YES unset  administratively down down
 
 <a id="sec-8"></a>
 ## 8. Wnioski i rekomendacje
+
+### 8.1. Podsumowanie końcowe
+
+Zrealizowany scenariusz potwierdził, że protokół OSPF, mimo swojej dojrzałości i powszechności, wymaga wyraźnego wydzielenia granic zaufania. W stanie bazowym sieć działała poprawnie: R1, R2 i R3 tworzyły spójne sąsiedztwo, trasy między sieciami końcowymi były poprawnie wymieniane, a komunikacja pomiędzy hostami końcowymi działała bez zakłóceń. Ten etap był istotny, ponieważ pokazał, że podatność nie wynikała z błędnej adresacji ani z awarii fizycznej, lecz z samego modelu zaufania obowiązującego w domenie routingu.
+
+W kolejnym kroku do domeny został wprowadzony router R-ATTACK, który po zestawieniu sąsiedztwa OSPF zaczął rozgłaszać dodatkowy prefiks 172.16.200.0/24. Z punktu widzenia legalnych routerów nowa trasa wyglądała poprawnie, ponieważ została odebrana przez mechanizmy protokołu jako zwyczajna informacja routingu od sąsiada z tej samej domeny. To pokazuje najważniejszy praktyczny problem OSPF: jeśli urządzenie może wejść do obszaru bez uwierzytelnienia, to sam mechanizm wymiany LSA nie odróżnia routera zaufanego od nieautoryzowanego.
+
+Wpływ ataku był widoczny w kilku miejscach jednocześnie. Na R2 pojawił się nowy sąsiad, a na R1 i R3 zostały zainstalowane dodatkowe trasy OSPF prowadzące do prefiksu wstrzykiwanego przez R-ATTACK. Potwierdzenie w tablicach routingu oraz w testach `tracert` było kluczowe, ponieważ sam stan sąsiedztwa nie wystarcza jeszcze do wykazania skuteczności ataku. Dopiero zbieżność informacji z sąsiedztwa, tras i testów łączności pokazała pełny obraz podatności.
+
+Następnie wdrożono mechanizm ochronny oparty o uwierzytelnianie MD5 oraz ograniczenie udziału interfejsu do R-ATTACK przez `passive-interface`. Ten krok zmienił charakter całego środowiska: legalne sąsiedztwa nadal działały, ale nieautoryzowany router został odcięty od możliwości uczestnictwa w wymianie OSPF. Efekt po zabezpieczeniu był jednoznaczny: R-ATTACK przestał być widoczny jako sąsiad, trasa do 172.16.200.0/24 zniknęła z legalnych routerów, a testowy ping/tracert nie potwierdził już osiągalności tego prefiksu.
+
+Z perspektywy dydaktycznej projekt pokazuje pełen cykl bezpieczeństwa sieciowego: stan poprawny, eksploatację podatności, wdrożenie środka ochronnego i ponowną walidację. Taki układ jest wartościowy, bo pozwala nie tylko opisać zagrożenie, ale też udowodnić skuteczność ochrony w identycznym środowisku testowym. W praktyce oznacza to, że ochrona OSPF nie powinna opierać się wyłącznie na założeniu, że do routerów dostaną się tylko właściwe urządzenia. Konieczne są mechanizmy techniczne, które ograniczają możliwość podłączenia się do domeny oraz wymuszają zgodność parametrów uwierzytelniania.
+
+Najważniejszy wniosek jest więc podwójny. Po pierwsze, OSPF bez zabezpieczeń jest podatny na route injection już na poziomie zestawienia sąsiedztwa. Po drugie, właściwie wdrożone MD5 i kontrola interfejsów skutecznie blokują ten scenariusz bez rozbijania poprawnej komunikacji pomiędzy legalnymi routerami. Dzięki temu projekt nie tylko demonstruje zagrożenie, ale również pokazuje prosty i praktyczny sposób jego ograniczenia.
 
 1. Nawet prosta domena OSPF jest podatna na route injection, jeśli nie ma uwierzytelniania i kontroli interfejsów.
 2. W środowisku Packet Tracer można jednoznacznie pokazać mechanizm ataku i skutek w tablicach routingu.
