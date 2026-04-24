@@ -2,14 +2,14 @@
 
 ## 12. Atak na OSPF - Fałszowanie tras (OSPF Route Injection)
 
-### Kierunek: Bezpieczeństwo sieci
+### Kierunek: Cyberbezpieczeństwo
 
 ### Autorzy
 - Karol Ziobro
 - Julia Jarząb
 
 ### Data
-2026-03-28
+2026-04-24
 
 ---
 
